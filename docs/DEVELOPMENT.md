@@ -13,6 +13,24 @@ Use test-driven development and micro-iterations to keep changes reviewable and 
 
 Avoid broad refactors and unrelated work in feature changes. If Android behavior cannot be tested locally, say so and record the exact device/emulator check still required.
 
+## Plans, issues and micro-iterations
+
+Keep plans at the level where they are useful:
+
+- [Product scope](./PRODUCT.md) is the durable product roadmap: goals, milestones and explicit non-goals.
+- [Architecture](./ARCHITECTURE.md) records the system structure, boundaries and technical decisions.
+- GitHub issues are the work backlog and source of truth for status. Use a parent issue for a multi-step milestone and linked child issues for independently reviewable behaviors. A GitHub Project board is optional; it should reflect the issues, not duplicate their descriptions.
+- Every GitHub issue, including parent issues, must contain exactly these four sections in this order. Treat the issue body as a self-contained implementation prompt; do not add other sections or text outside these headings:
+  1. `Target Files` — explicitly list the relevant files for the task. Include existing files to inspect and expected files to change or add; use repository-relative paths.
+  2. `Current State` — accurately describe existing behavior and relevant test coverage. Verify this against the current code before writing the issue.
+  3. `Desired State` — state the exact technical outcome and boundaries, not just a broad goal.
+  4. `Acceptance Criteria (TDD Hooks)` — give observable, testable conditions. Name focused tests/checks, expected assertions or behavior, and any manual device verification. For behavior changes, specify a focused test to add or update before implementation where practical.
+- Keep each issue's scope small enough to complete and review in a few focused test-driven increments. Use parent issues to group related children and summarize their combined outcome; link children through GitHub's sub-issue relationship, not merely by mentioning their numbers in prose.
+
+For each issue, update its checklist as work proceeds. Each micro-iteration should cover one observable behavior: state the expected result, add or update the focused test, observe it fail when practical, implement the smallest change, run the focused check, and review the diff before moving on. Add broader test/build checks before completion as required below. If investigation changes the approach, update the issue rather than maintaining a separate plan document.
+
+Do not create standalone planning or tracking files for individual changes, and do not use chat/session notes as the only record of a decision or task. If GitHub issue write access is unavailable, do not imply that GitHub was updated; provide the complete four-section issue bodies and the exact steps or access needed from the repository owner.
+
 ## Tests and build checks
 
 Run from the repository root:
@@ -55,18 +73,4 @@ Before proposing a merge:
 4. Open a pull request with the behavior, test evidence and any remaining device-only checks.
 5. Merge only after review and required checks pass.
 
-Do not commit directly to the shared default branch for ordinary development. Choose branch protection and merge strategy when the GitHub repository is created.
-
-## GitHub remote setup
-
-The project files are intentionally not initialized as a Git repository. The owner can create an empty GitHub repository, then run these commands from the project root, replacing the URL:
-
-```sh
-git init --initial-branch=main
-git add .
-git commit -m "chore: create Android launcher project"
-git remote add origin https://github.com/OWNER/REPOSITORY.git
-git push -u origin main
-```
-
-Prefer SSH if that is how the owner's GitHub account is configured. Confirm that no credentials or local machine configuration are staged before the first push.
+Do not commit directly to the shared default branch for ordinary development. Follow the repository's configured branch protection and merge strategy.
