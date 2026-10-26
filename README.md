@@ -53,6 +53,18 @@ The debug APK is written to `app/build/outputs/apk/debug/app-debug.apk`. The uni
 5. Press the emulator's Home button. Select **Nacre Launcher** in Android's Home-app chooser and choose **Always** (or select it in the system's Default apps → Home app settings).
 6. Verify the launcher using the checklist below. To install a later build, rerun `./gradlew :app:installDebug`.
 
+### Updating or removing an installed build
+
+`./gradlew :app:installDebug` installs the new debug APK over the existing app because the application ID remains `dev.stepan.nacrelauncher`. You do not need to uninstall the previous version first; Android replaces its code and normally preserves the app's private data, including local launch counts. Keep the same application ID and signing key for Android to accept an APK as an update. Debug builds are signed consistently by the local Android build tools.
+
+To remove the launcher, first select a different Home app in Android's default Home-app settings. Then uninstall it from the connected device:
+
+```sh
+adb uninstall dev.stepan.nacrelauncher
+```
+
+Uninstalling removes the app and its private data. It is not needed for normal updates.
+
 ## Install and test on a Nothing Phone (1)
 
 1. On the phone, enable Developer options: open **Settings → About phone**, find **Build number**, and tap it seven times. Enter the device PIN if prompted.
@@ -67,7 +79,7 @@ The debug APK is written to `app/build/outputs/apk/debug/app-debug.apk`. The uni
 
    The device should appear with status `device`. If it says `unauthorized`, unlock the phone and accept the debugging prompt. If multiple devices are connected, use the serial-specific `adb -s <device-serial> install -r app/build/outputs/apk/debug/app-debug.apk` command shown above.
 5. Select **Nacre Launcher** as the default Home app in Android's Home-app chooser or **Settings → Apps → Default apps → Home app**. Labels and paths can differ by Nothing OS version.
-6. Press Home and verify the checklist. To remove the launcher later, choose another Home app in Settings, then run `adb uninstall dev.stepan.nacrelauncher` if desired.
+6. Press Home and verify the checklist. For updates, rerun `./gradlew :app:installDebug`; to remove it, follow [Updating or removing an installed build](#updating-or-removing-an-installed-build).
 
 ## Launcher verification checklist
 
