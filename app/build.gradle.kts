@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "dev.stepan.quietlauncher"
+    namespace = "dev.stepan.nacrelauncher"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "dev.stepan.quietlauncher"
+        applicationId = "dev.stepan.nacrelauncher"
         minSdk = 28
         targetSdk = 35
         versionCode = 1

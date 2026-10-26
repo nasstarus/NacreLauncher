@@ -1,11 +1,10 @@
 <resources>
-    <style name="Theme.QuietLauncher" parent="android:style/Theme.Material.NoActionBar">
+    <style name="Theme.NacreLauncher" parent="android:style/Theme.Material.NoActionBar">
         <item name="android:fontFamily">sans</item>
-        <item name="android:colorAccent">#A8C7FA</item>
+        <item name="android:colorAccent">#D6CEC0</item>
         <item name="android:windowLightStatusBar">false</item>
-        <item name="android:statusBarColor">#111411</item>
-        <item name="android:navigationBarColor">#111411</item>
+        <item name="android:statusBarColor">#151511</item>
+        <item name="android:navigationBarColor">#151511</item>
         <item name="android:windowActionModeOverlay">true</item>
     </style>
 </resources>
-

@@ -1,4 +1,4 @@
-package dev.stepan.quietlauncher
+package dev.stepan.nacrelauncher
 
 import android.graphics.drawable.Drawable
 import androidx.compose.foundation.Image

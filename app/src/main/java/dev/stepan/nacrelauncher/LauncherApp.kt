@@ -1,4 +1,4 @@
-package dev.stepan.quietlauncher
+package dev.stepan.nacrelauncher
 
 import android.app.Application
 import android.content.Intent

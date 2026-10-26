@@ -1,4 +1,4 @@
-package dev.stepan.quietlauncher
+package dev.stepan.nacrelauncher
 
 import android.os.Bundle
 import android.widget.Toast
@@ -18,12 +18,12 @@ class LauncherActivity : ComponentActivity() {
         setContent {
             MaterialTheme(
                 colorScheme = darkColorScheme(
-                    primary = Color(0xFFA8C7FA),
-                    onPrimary = Color(0xFF102F4A),
-                    background = Color(0xFF111411),
-                    surface = Color(0xFF1A1F1B),
-                    onSurface = Color(0xFFE2E3DD),
-                    secondary = Color(0xFFB9CCB5),
+                    primary = Color(0xFFD6CEC0),
+                    onPrimary = Color(0xFF302C25),
+                    background = Color(0xFF151511),
+                    surface = Color(0xFF201F1B),
+                    onSurface = Color(0xFFE8E2D8),
+                    secondary = Color(0xFFC8BDAA),
                 ),
             ) {
                 val apps = viewModel.apps.collectAsStateWithLifecycle().value

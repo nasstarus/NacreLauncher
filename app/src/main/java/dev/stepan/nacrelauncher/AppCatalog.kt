@@ -1,4 +1,4 @@
-package dev.stepan.quietlauncher
+package dev.stepan.nacrelauncher
 
 object AppCatalog {
     fun <T> filterApps(apps: List<LauncherApp<T>>, query: String): List<LauncherApp<T>> {

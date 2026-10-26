@@ -1,4 +1,4 @@
-package dev.stepan.quietlauncher
+package dev.stepan.nacrelauncher
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows

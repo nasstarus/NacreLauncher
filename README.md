@@ -1,4 +1,4 @@
-# Quiet Launcher
+# Nacre Launcher
 
 A minimal Android home screen inspired by the focused, desktop-like feel of Fedora Workstation. The Nothing Phone (1) is the first physical test device; the project targets broadly compatible Android APIs.
 
@@ -30,7 +30,7 @@ Install on a connected device or emulator:
 ./gradlew :app:installDebug
 ```
 
-On the Nothing Phone (1), select **Quiet Launcher** as the default Home app in Android's Home app settings. Android settings labels can differ by Nothing OS version.
+On the Nothing Phone (1), select **Nacre Launcher** as the default Home app in Android's Home app settings. Android settings labels can differ by Nothing OS version.
 
 ## Project guide
 
