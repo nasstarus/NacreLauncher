@@ -1,0 +1,66 @@
+package dev.stepan.quietlauncher
+
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertThrows
+import org.junit.Test
+
+class AppCatalogTest {
+    private val apps = listOf(
+        app("Maps", "com.example.maps"),
+        app("Mail", "com.example.mail"),
+        app("Music", "com.example.music"),
+    )
+
+    @Test
+    fun `filter matches label regardless of case and surrounding spaces`() {
+        assertEquals(
+            listOf(apps[0]),
+            AppCatalog.filterApps(apps, "  mApS "),
+        )
+    }
+
+    @Test
+    fun `filter matches package name`() {
+        assertEquals(
+            listOf(apps[1]),
+            AppCatalog.filterApps(apps, "EXAMPLE.MAIL"),
+        )
+    }
+
+    @Test
+    fun `blank filter preserves app list and its order`() {
+        assertEquals(apps, AppCatalog.filterApps(apps, "  "))
+    }
+
+    @Test
+    fun `dock ranks most launched apps first then sorts ties by label`() {
+        val usageCounts = mapOf(
+            "com.example.maps" to 2,
+            "com.example.mail" to 8,
+            "com.example.music" to 8,
+        )
+
+        assertEquals(
+            listOf(apps[1], apps[2], apps[0]),
+            AppCatalog.dockApps(apps, usageCounts),
+        )
+    }
+
+    @Test
+    fun `dock limits app count`() {
+        assertEquals(
+            listOf(apps[1]),
+            AppCatalog.dockApps(apps, mapOf("com.example.mail" to 1), limit = 1),
+        )
+    }
+
+    @Test
+    fun `negative dock limit is rejected`() {
+        assertThrows(IllegalArgumentException::class.java) {
+            AppCatalog.dockApps(apps, emptyMap(), limit = -1)
+        }
+    }
+
+    private fun app(label: String, packageName: String) =
+        LauncherApp(label, packageName, icon = Unit)
+}

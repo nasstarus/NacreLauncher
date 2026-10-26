@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">Quiet Launcher</string>
+    <string name="home_title">Make room for what matters.</string>
+    <string name="home_subtitle">Your apps, close at hand.</string>
+    <string name="frequent_apps">FREQUENT</string>
+    <string name="search_label">SEARCH</string>
+    <string name="search_apps">Search apps</string>
+    <string name="all_apps">All apps</string>
+    <string name="no_launchable_apps">No launchable apps were found.</string>
+    <string name="no_matching_apps">No apps match “%1$s”.</string>
+    <string name="launch_error">Could not open %1$s. It may have been removed or disabled.</string>
+</resources>
