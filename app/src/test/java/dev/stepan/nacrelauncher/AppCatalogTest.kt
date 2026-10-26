@@ -47,6 +47,20 @@ class AppCatalogTest {
     }
 
     @Test
+    fun `dock sorts equal usage and label ties by package name regardless of input order`() {
+        val alphaPackageApp = app("Tools", "com.example.alpha")
+        val zetaPackageApp = app("Tools", "com.example.zeta")
+        val usageCounts = mapOf(
+            alphaPackageApp.packageName to 4,
+            zetaPackageApp.packageName to 4,
+        )
+        val expected = listOf(alphaPackageApp, zetaPackageApp)
+
+        assertEquals(expected, AppCatalog.dockApps(listOf(zetaPackageApp, alphaPackageApp), usageCounts))
+        assertEquals(expected, AppCatalog.dockApps(listOf(alphaPackageApp, zetaPackageApp), usageCounts))
+    }
+
+    @Test
     fun `dock limits app count`() {
         assertEquals(
             listOf(apps[1]),

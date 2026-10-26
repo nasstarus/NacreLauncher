@@ -67,7 +67,10 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
                     icon = resolveInfo.loadIcon(context.packageManager),
                 )
             }
-            .sortedWith(compareBy(String.CASE_INSENSITIVE_ORDER) { it.label }.thenBy { it.packageName })
+            .sortedWith(
+                compareBy<LauncherApp<Drawable>, String>(String.CASE_INSENSITIVE_ORDER) { it.label }
+                    .thenBy { it.packageName },
+            )
             .toList()
     }
 
