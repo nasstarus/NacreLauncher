@@ -1,6 +1,7 @@
 .gradle/
 .idea/
 local.properties
+/*.rpm
 .DS_Store
 *.iml
 /build/
@@ -9,4 +10,3 @@ local.properties
 /.kotlin/
 /out/
 /session-state/
-
