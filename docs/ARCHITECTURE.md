@@ -15,16 +15,17 @@ The project uses Kotlin, Jetpack Compose and Gradle. The Gradle wrapper is the c
 - `LauncherActivity` registers the Home experience, refreshes the app catalog when resumed, connects lifecycle-aware state to Compose and shows an actionable message when a launch fails.
 - `LauncherViewModel` queries launchable activities through `PackageManager`, stores favorite package names in private preferences, exposes them as state and starts the selected app.
 - `AppCatalog` contains deterministic search and favorite-selection behavior that can be tested as plain Kotlin.
-- `LauncherHome` renders a favorites-only vertical capsule dock on the desktop and a separate searchable app library with pin/unpin actions.
+- `LauncherHome` renders a date-only desktop header, favorites-only vertical capsule dock with optional labels, a settings surface, and a separate searchable app library.
 
 The manifest declares a `MAIN`/`HOME`/`DEFAULT` activity and a package-visibility query for `MAIN`/`LAUNCHER`. Do not request broad package visibility: only launcher activities are needed for this catalog.
 
 ## Next milestone direction
 
-- Replace the usage-ranked dock with an explicit, locally persisted set of favorite package names; dock membership must not depend on launch counts.
-- Separate the desktop Home surface from the searchable all-apps library. Keep library navigation available through both a visible accessible control and a three-finger upward drag.
-- Implement the dock as Compose/UI within the launcher's Home surface. “Floating” is a visual treatment, not a system overlay or arbitrary third-party app window.
-- Test favorite selection/order and gesture recognition independently where possible. Validate touch dispatch, Android navigation/accessibility conflicts, and the visible fallback on an emulator and physical Nothing Phone (1).
+- Replace the desktop's text library action with a small circular icon control below the dock.
+- Support reordering dock favorites by dragging them vertically; preserve the chosen order locally.
+- Add a library-wide selection mode so apps can be added to or removed from the dock without per-app pin buttons.
+- Investigate the three-finger upward gesture for opening the library, retaining the visible control as an accessible fallback.
+- Validate touch dispatch, Android navigation/accessibility conflicts, and the visible fallback on an emulator and physical Nothing Phone (1).
 
 ## Android capability boundaries
 
@@ -34,7 +35,7 @@ Widgets use Android's AppWidget APIs and have lifecycle/configuration requiremen
 
 ## State and privacy
 
-Favorite package names are stored locally in private preferences. Do not infer favorites from launch history or retain launch counters. Do not add telemetry, account sync or network permissions without an explicit product requirement.
+Favorite package names and the dock-label visibility setting are stored locally in private preferences. Dock labels default to hidden to maximize available space; the dock remains scrollable when the number of favorites exceeds the visible area. Do not infer favorites from launch history or retain launch counters. Do not add telemetry, account sync or network permissions without an explicit product requirement.
 
 ## Testing boundaries
 

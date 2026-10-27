@@ -29,6 +29,11 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
     )
     val favoritePackageNames: StateFlow<Set<String>> = _favoritePackageNames.asStateFlow()
 
+    private val _showDockLabels = MutableStateFlow(
+        preferences.getBoolean(SHOW_DOCK_LABELS_KEY, false),
+    )
+    val showDockLabels: StateFlow<Boolean> = _showDockLabels.asStateFlow()
+
     init {
         val preferencesEditor = preferences.edit()
         preferences.all.keys
@@ -51,6 +56,12 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
 
     fun unpinApp(packageName: String) {
         updateFavorite(packageName, isFavorite = false)
+    }
+
+    fun setShowDockLabels(show: Boolean) {
+        if (_showDockLabels.value == show) return
+        preferences.edit().putBoolean(SHOW_DOCK_LABELS_KEY, show).apply()
+        _showDockLabels.value = show
     }
 
     fun launchApp(packageName: String): Boolean {
@@ -104,6 +115,7 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
     private companion object {
         const val PREFERENCES_NAME = "launcher_usage"
         const val FAVORITES_KEY = "favorite_package_names"
+        const val SHOW_DOCK_LABELS_KEY = "show_dock_labels"
         const val USAGE_PREFIX = "launch_count:"
     }
 }

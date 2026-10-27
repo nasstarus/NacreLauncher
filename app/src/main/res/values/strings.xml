@@ -1,8 +1,8 @@
 <resources>
     <string name="app_name">Nacre Launcher</string>
-    <string name="home_title">Make room for what matters.</string>
-    <string name="home_subtitle">Your apps, close at hand.</string>
     <string name="app_library">App library</string>
+    <string name="settings">Settings</string>
+    <string name="show_dock_app_names">Show app names in dock</string>
     <string name="open_app_library">Browse all apps</string>
     <string name="return_to_desktop">Back to desktop</string>
     <string name="empty_favorites">Your dock is empty. Browse all apps to pin favorites.</string>

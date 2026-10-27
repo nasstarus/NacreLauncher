@@ -11,9 +11,9 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
@@ -30,6 +30,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -42,12 +43,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.platform.testTag
 import androidx.core.graphics.drawable.toBitmap
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -59,40 +64,56 @@ fun LauncherHome(
     favoritePackageNames: Set<String>,
     onFavoriteToggle: (String, Boolean) -> Unit,
     onLaunch: (LauncherApp<Drawable>) -> Unit,
+    showDockLabels: Boolean = false,
+    onShowDockLabelsChange: (Boolean) -> Unit = {},
 ) {
     var query by rememberSaveable { mutableStateOf("") }
-    var isLibraryVisible by rememberSaveable { mutableStateOf(false) }
+    var screen by rememberSaveable { mutableStateOf(HomeScreen.Desktop) }
     val dockApps = AppCatalog.favoriteApps(apps, favoritePackageNames)
     val dateLabel = LocalDate.now().format(
         DateTimeFormatter.ofPattern("EEEE, d MMMM", Locale.getDefault()),
     )
 
-    if (isLibraryVisible) {
-        AppLibrary(
+    when (screen) {
+        HomeScreen.Desktop -> DesktopHome(
+            dateLabel = dateLabel,
+            dockApps = dockApps,
+            showDockLabels = showDockLabels,
+            onLaunch = onLaunch,
+            onOpenLibrary = { screen = HomeScreen.Library },
+            onOpenSettings = { screen = HomeScreen.Settings },
+        )
+        HomeScreen.Library -> AppLibrary(
             apps = apps,
             query = query,
             onQueryChange = { query = it },
             favoritePackageNames = favoritePackageNames,
             onFavoriteToggle = onFavoriteToggle,
             onLaunch = onLaunch,
-            onBack = { isLibraryVisible = false },
+            onBack = { screen = HomeScreen.Desktop },
         )
-    } else {
-        DesktopHome(
-            dateLabel = dateLabel,
-            dockApps = dockApps,
-            onLaunch = onLaunch,
-            onOpenLibrary = { isLibraryVisible = true },
+        HomeScreen.Settings -> SettingsScreen(
+            showDockLabels = showDockLabels,
+            onShowDockLabelsChange = onShowDockLabelsChange,
+            onBack = { screen = HomeScreen.Desktop },
         )
     }
+}
+
+private enum class HomeScreen {
+    Desktop,
+    Library,
+    Settings,
 }
 
 @Composable
 private fun DesktopHome(
     dateLabel: String,
     dockApps: List<LauncherApp<Drawable>>,
+    showDockLabels: Boolean,
     onLaunch: (LauncherApp<Drawable>) -> Unit,
     onOpenLibrary: () -> Unit,
+    onOpenSettings: () -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -101,25 +122,22 @@ private fun DesktopHome(
             .safeDrawingPadding()
             .padding(horizontal = 24.dp),
     ) {
-        Column(modifier = Modifier.padding(top = 32.dp)) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 24.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
             Text(
                 text = dateLabel.uppercase(Locale.getDefault()),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.secondary,
+                modifier = Modifier.testTag("home-date"),
             )
-            Spacer(Modifier.height(10.dp))
-            Text(
-                text = stringResource(R.string.home_title),
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Medium,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-            Spacer(Modifier.height(6.dp))
-            Text(
-                text = stringResource(R.string.home_subtitle),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.secondary,
-            )
+            TextButton(onClick = onOpenSettings) {
+                Text(stringResource(R.string.settings))
+            }
         }
 
         Box(
@@ -138,13 +156,17 @@ private fun DesktopHome(
                     contentPadding = PaddingValues(vertical = 12.dp, horizontal = 8.dp),
                     modifier = Modifier
                         .widthIn(min = 88.dp, max = 88.dp)
-                        .heightIn(max = 560.dp)
+                        .fillMaxHeight()
                         .clip(CircleShape)
                         .background(MaterialTheme.colorScheme.surface)
                         .testTag("favorite-dock"),
                 ) {
                     items(dockApps.size, key = { dockApps[it].packageName }) { index ->
-                        AppShortcut(app = dockApps[index], onClick = { onLaunch(dockApps[index]) })
+                        AppShortcut(
+                            app = dockApps[index],
+                            showLabel = showDockLabels,
+                            onClick = { onLaunch(dockApps[index]) },
+                        )
                     }
                 }
             }
@@ -157,6 +179,57 @@ private fun DesktopHome(
                 .padding(bottom = 20.dp),
         ) {
             Text(stringResource(R.string.open_app_library))
+        }
+    }
+}
+
+@Composable
+private fun SettingsScreen(
+    showDockLabels: Boolean,
+    onShowDockLabelsChange: (Boolean) -> Unit,
+    onBack: () -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .safeDrawingPadding()
+            .padding(horizontal = 24.dp),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 24.dp, bottom = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = stringResource(R.string.settings),
+                style = MaterialTheme.typography.headlineSmall,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.weight(1f),
+            )
+            TextButton(onClick = onBack) {
+                Text(stringResource(R.string.return_to_desktop))
+            }
+        }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { onShowDockLabelsChange(!showDockLabels) }
+                .padding(vertical = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = stringResource(R.string.show_dock_app_names),
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.weight(1f),
+            )
+            Switch(
+                checked = showDockLabels,
+                onCheckedChange = onShowDockLabelsChange,
+                modifier = Modifier.testTag("show-dock-labels-switch"),
+            )
         }
     }
 }
@@ -298,24 +371,35 @@ private fun SearchBox(
 }
 
 @Composable
-private fun AppShortcut(app: LauncherApp<Drawable>, onClick: () -> Unit) {
+private fun AppShortcut(
+    app: LauncherApp<Drawable>,
+    showLabel: Boolean,
+    onClick: () -> Unit,
+) {
     Column(
         modifier = Modifier
             .width(72.dp)
             .clip(RoundedCornerShape(18.dp))
             .clickable(onClick = onClick)
+            .semantics {
+                contentDescription = app.label
+                role = Role.Button
+            }
+            .testTag("dock-app-${app.packageName}")
             .padding(vertical = 6.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         AppIcon(app = app, size = 52.dp)
-        Spacer(Modifier.height(6.dp))
-        Text(
-            text = app.label,
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurface,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
+        if (showLabel) {
+            Spacer(Modifier.height(6.dp))
+            Text(
+                text = app.label,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
     }
 }
 
