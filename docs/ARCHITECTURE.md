@@ -15,7 +15,7 @@ The project uses Kotlin, Jetpack Compose and Gradle. The Gradle wrapper is the c
 - `LauncherActivity` registers the Home experience, refreshes the app catalog when resumed, connects lifecycle-aware state to Compose and shows an actionable message when a launch fails.
 - `LauncherViewModel` queries launchable activities through `PackageManager`, stores favorite package names in private preferences, exposes them as state and starts the selected app.
 - `AppCatalog` contains deterministic search and favorite-selection behavior that can be tested as plain Kotlin.
-- `LauncherHome` renders a favorites-only desktop dock and a separate searchable app library with pin/unpin actions.
+- `LauncherHome` renders a favorites-only vertical capsule dock on the desktop and a separate searchable app library with pin/unpin actions.
 
 The manifest declares a `MAIN`/`HOME`/`DEFAULT` activity and a package-visibility query for `MAIN`/`LAUNCHER`. Do not request broad package visibility: only launcher activities are needed for this catalog.
 

@@ -13,11 +13,14 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.Assert.assertTrue
+import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -66,23 +69,48 @@ class LauncherHomeTest {
         composeRule.onNodeWithText("Pin Maps").performClick()
         composeRule.onNodeWithText("Back to desktop").performClick()
 
-        composeRule.onNodeWithText("Maps").assertExists()
+        composeRule.onNodeWithText("Maps").assertIsDisplayed()
         composeRule.onAllNodesWithText("Your dock is empty. Browse all apps to pin favorites.")
             .assertCountEquals(0)
     }
 
+    @Test
+    fun favoriteDockIsVerticalAtRightAndShortcutsLaunch() {
+        var launchedPackage: String? = null
+        setLauncherHome(
+            favorites = apps.map { it.packageName }.toSet(),
+            onLaunch = { launchedPackage = it.packageName },
+        )
+
+        val dockBounds = composeRule.onNodeWithTag("favorite-dock").fetchSemanticsNode().boundsInRoot
+        val mapsBounds = composeRule.onNodeWithText("Maps").fetchSemanticsNode().boundsInRoot
+        val musicBounds = composeRule.onNodeWithText("Music").fetchSemanticsNode().boundsInRoot
+        val rootBounds = composeRule.onRoot().fetchSemanticsNode().boundsInRoot
+
+        assertTrue("Dock should be taller than it is wide", dockBounds.height > dockBounds.width)
+        assertTrue("Dock should be on the right half of the desktop", dockBounds.center.x > rootBounds.center.x)
+        assertEquals(mapsBounds.center.x, musicBounds.center.x, 1f)
+        assertTrue(mapsBounds.center.y < musicBounds.center.y)
+
+        composeRule.onNodeWithText("Maps").performClick()
+        composeRule.runOnIdle {
+            assertEquals("com.example.maps", launchedPackage)
+        }
+    }
+
     private fun setLauncherHome(
+        favorites: Set<String> = emptySet(),
         onLaunch: (LauncherApp<Drawable>) -> Unit = {},
     ) {
         composeRule.setContent {
-            var favorites by remember { mutableStateOf(emptySet<String>()) }
+            var favoritePackageNames by remember { mutableStateOf(favorites) }
             MaterialTheme {
                 LauncherHome(
                     apps = apps,
-                    favoritePackageNames = favorites,
+                    favoritePackageNames = favoritePackageNames,
                     onFavoriteToggle = { packageName, isFavorite ->
-                        favorites = AppCatalog.updateFavoritePackageNames(
-                            favorites,
+                        favoritePackageNames = AppCatalog.updateFavoritePackageNames(
+                            favoritePackageNames,
                             packageName,
                             isFavorite,
                         )
