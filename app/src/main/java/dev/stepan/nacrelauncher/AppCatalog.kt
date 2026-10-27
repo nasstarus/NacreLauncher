@@ -23,4 +23,17 @@ object AppCatalog {
                 .thenBy { it.packageName },
         ).take(limit)
     }
+
+    fun <T> favoriteApps(
+        apps: List<LauncherApp<T>>,
+        favoritePackageNames: Set<String>,
+    ): List<LauncherApp<T>> =
+        apps.asSequence()
+            .filter { it.packageName in favoritePackageNames }
+            .distinctBy { it.packageName }
+            .sortedWith(
+                compareBy<LauncherApp<T>, String>(String.CASE_INSENSITIVE_ORDER) { it.label }
+                    .thenBy { it.packageName },
+            )
+            .toList()
 }

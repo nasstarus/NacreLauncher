@@ -61,6 +61,19 @@ class AppCatalogTest {
     }
 
     @Test
+    fun `favorite dock contains only installed favorites once in deterministic order`() {
+        val zeta = app("Tools", "com.example.zeta")
+        val alpha = app("Tools", "com.example.alpha")
+        val mail = app("Mail", "com.example.mail")
+        val favorites = setOf(zeta.packageName, alpha.packageName, "com.example.uninstalled")
+        val expected = listOf(alpha, zeta)
+
+        assertEquals(expected, AppCatalog.favoriteApps(listOf(zeta, mail, alpha), favorites))
+        assertEquals(expected, AppCatalog.favoriteApps(listOf(alpha, zeta, mail), favorites))
+        assertEquals(expected, AppCatalog.favoriteApps(listOf(zeta, zeta, alpha, mail), favorites))
+    }
+
+    @Test
     fun `dock limits app count`() {
         assertEquals(
             listOf(apps[1]),
