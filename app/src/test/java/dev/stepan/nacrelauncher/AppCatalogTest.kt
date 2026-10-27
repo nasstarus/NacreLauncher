@@ -74,6 +74,17 @@ class AppCatalogTest {
     }
 
     @Test
+    fun `pinning and unpinning favorites is idempotent`() {
+        val initiallyEmpty = emptySet<String>()
+        val pinned = AppCatalog.updateFavoritePackageNames(initiallyEmpty, "com.example.mail", true)
+
+        assertEquals(setOf("com.example.mail"), pinned)
+        assertEquals(pinned, AppCatalog.updateFavoritePackageNames(pinned, "com.example.mail", true))
+        assertEquals(emptySet<String>(), AppCatalog.updateFavoritePackageNames(pinned, "com.example.mail", false))
+        assertEquals(initiallyEmpty, AppCatalog.updateFavoritePackageNames(initiallyEmpty, "com.example.mail", false))
+    }
+
+    @Test
     fun `dock limits app count`() {
         assertEquals(
             listOf(apps[1]),

@@ -27,12 +27,25 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
     private val _usageCounts = MutableStateFlow(readUsageCounts())
     val usageCounts: StateFlow<Map<String, Int>> = _usageCounts.asStateFlow()
 
+    private val _favoritePackageNames = MutableStateFlow(
+        preferences.getStringSet(FAVORITES_KEY, emptySet()).orEmpty().toSet(),
+    )
+    val favoritePackageNames: StateFlow<Set<String>> = _favoritePackageNames.asStateFlow()
+
     fun refreshApps() {
         viewModelScope.launch {
             _apps.value = withContext(Dispatchers.IO) {
                 loadLaunchableApps()
             }
         }
+    }
+
+    fun pinApp(packageName: String) {
+        updateFavorite(packageName, isFavorite = true)
+    }
+
+    fun unpinApp(packageName: String) {
+        updateFavorite(packageName, isFavorite = false)
     }
 
     fun launchApp(packageName: String): Boolean {
@@ -51,6 +64,18 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
         } catch (_: SecurityException) {
             false
         }
+    }
+
+    private fun updateFavorite(packageName: String, isFavorite: Boolean) {
+        val updatedFavorites = AppCatalog.updateFavoritePackageNames(
+            _favoritePackageNames.value,
+            packageName,
+            isFavorite,
+        )
+        if (updatedFavorites == _favoritePackageNames.value) return
+
+        preferences.edit().putStringSet(FAVORITES_KEY, updatedFavorites.toSet()).apply()
+        _favoritePackageNames.value = updatedFavorites.toSet()
     }
 
     private fun loadLaunchableApps(): List<LauncherApp<Drawable>> {
@@ -87,6 +112,7 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
 
     private companion object {
         const val PREFERENCES_NAME = "launcher_usage"
+        const val FAVORITES_KEY = "favorite_package_names"
         const val USAGE_PREFIX = "launch_count:"
     }
 }

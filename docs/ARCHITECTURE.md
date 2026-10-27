@@ -13,7 +13,7 @@ The project uses Kotlin, Jetpack Compose and Gradle. The Gradle wrapper is the c
 ## Current responsibilities
 
 - `LauncherActivity` registers the Home experience, refreshes the app catalog when resumed, connects lifecycle-aware state to Compose and shows an actionable message when a launch fails.
-- `LauncherViewModel` queries launchable activities through `PackageManager`, stores per-package launch counts in private preferences and starts the selected app.
+- `LauncherViewModel` queries launchable activities through `PackageManager`, stores favorite package names and per-package launch counts in private preferences, exposes both as state and starts the selected app.
 - `AppCatalog` contains deterministic search and dock-ranking behavior that can be tested as plain Kotlin.
 - `LauncherHome` renders the date, frequently used app row, search field and adaptive app grid.
 
@@ -34,7 +34,7 @@ Widgets use Android's AppWidget APIs and have lifecycle/configuration requiremen
 
 ## State and privacy
 
-Dock ranking is based on local launch counts keyed by package name. Keep this data private to the app and make the ranking deterministic for ties. Do not add telemetry, account sync or network permissions without an explicit product requirement.
+Favorite package names and launch counts are stored locally in private preferences. The explicit-favorites milestone is replacing launch-count-based dock ranking; do not infer favorites from launch history. Keep any retained usage data private to the app, and do not add telemetry, account sync or network permissions without an explicit product requirement.
 
 ## Testing boundaries
 

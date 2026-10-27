@@ -36,4 +36,15 @@ object AppCatalog {
                     .thenBy { it.packageName },
             )
             .toList()
+
+    fun updateFavoritePackageNames(
+        favoritePackageNames: Set<String>,
+        packageName: String,
+        isFavorite: Boolean,
+    ): Set<String> =
+        if (isFavorite) {
+            favoritePackageNames + packageName
+        } else {
+            favoritePackageNames - packageName
+        }
 }
