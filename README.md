@@ -2,16 +2,18 @@
 
 A minimal Android home screen inspired by the focused, desktop-like feel of Fedora Workstation. The Nothing Phone (1) is the first physical test device; the project targets broadly compatible Android APIs.
 
-## Current milestone
+## Milestone status and next step
 
-The first milestone is a usable home replacement with:
+The launcher foundation is implemented and verified on the Nothing Phone (1), per the project owner's device check:
 
 - A quiet, dark home surface
 - A frequently used app dock, ranked by launch counts on this device
 - A searchable collection of installed launchable apps
 - A standard Android home-app entry point
 
-Widgets, multi-touch app switching and floating windows are later milestones. In particular, ordinary third-party apps cannot reliably embed arbitrary other apps in movable windows through standard Android APIs. Later work must assess Android Picture-in-Picture and any other supported modes without promising universal freeform windows.
+The next milestone ([GitHub parent issue #3](https://github.com/nasstarus/NacreLauncher/issues/3)) is a cleaner desktop-style Home surface with a visually floating dock for user-selected favorite apps and a separate searchable app library. Open the library with both a visible accessible control and a three-finger upward drag. Here “floating” describes the dock's visual placement in the launcher UI, not an Android overlay or a way to host arbitrary apps in movable windows.
+
+Widgets, app-switching gestures and app windowing remain later milestones. In particular, ordinary third-party apps cannot reliably embed arbitrary other apps in movable windows through standard Android APIs. Future work must assess Android Picture-in-Picture and other supported modes without promising universal freeform windows.
 
 ## Build and test
 

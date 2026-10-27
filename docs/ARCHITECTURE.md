@@ -19,6 +19,13 @@ The project uses Kotlin, Jetpack Compose and Gradle. The Gradle wrapper is the c
 
 The manifest declares a `MAIN`/`HOME`/`DEFAULT` activity and a package-visibility query for `MAIN`/`LAUNCHER`. Do not request broad package visibility: only launcher activities are needed for this catalog.
 
+## Next milestone direction
+
+- Replace the usage-ranked dock with an explicit, locally persisted set of favorite package names; dock membership must not depend on launch counts.
+- Separate the desktop Home surface from the searchable all-apps library. Keep library navigation available through both a visible accessible control and a three-finger upward drag.
+- Implement the dock as Compose/UI within the launcher's Home surface. “Floating” is a visual treatment, not a system overlay or arbitrary third-party app window.
+- Test favorite selection/order and gesture recognition independently where possible. Validate touch dispatch, Android navigation/accessibility conflicts, and the visible fallback on an emulator and physical Nothing Phone (1).
+
 ## Android capability boundaries
 
 A regular launcher can request to be the Home app and launch exported app activities. Android does not provide a general API for one ordinary app to re-parent arbitrary third-party activities into freely movable windows. Use only the target app's supported Android multi-window/PiP behavior unless a separately approved privileged integration is feasible and maintainable.
