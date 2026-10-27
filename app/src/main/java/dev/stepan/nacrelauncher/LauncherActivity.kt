@@ -27,10 +27,14 @@ class LauncherActivity : ComponentActivity() {
                 ),
             ) {
                 val apps = viewModel.apps.collectAsStateWithLifecycle().value
-                val usageCounts = viewModel.usageCounts.collectAsStateWithLifecycle().value
+                val favoritePackageNames =
+                    viewModel.favoritePackageNames.collectAsStateWithLifecycle().value
                 LauncherHome(
                     apps = apps,
-                    usageCounts = usageCounts,
+                    favoritePackageNames = favoritePackageNames,
+                    onFavoriteToggle = { packageName, isFavorite ->
+                        if (isFavorite) viewModel.pinApp(packageName) else viewModel.unpinApp(packageName)
+                    },
                     onLaunch = { app ->
                         if (!viewModel.launchApp(app.packageName)) {
                             Toast.makeText(

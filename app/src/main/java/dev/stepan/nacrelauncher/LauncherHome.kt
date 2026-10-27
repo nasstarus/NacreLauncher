@@ -24,10 +24,11 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -40,6 +41,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
@@ -50,16 +52,44 @@ import java.util.Locale
 @Composable
 fun LauncherHome(
     apps: List<LauncherApp<Drawable>>,
-    usageCounts: Map<String, Int>,
+    favoritePackageNames: Set<String>,
+    onFavoriteToggle: (String, Boolean) -> Unit,
     onLaunch: (LauncherApp<Drawable>) -> Unit,
 ) {
     var query by rememberSaveable { mutableStateOf("") }
-    val filteredApps = AppCatalog.filterApps(apps, query)
-    val dockApps = AppCatalog.dockApps(apps, usageCounts)
+    var isLibraryVisible by rememberSaveable { mutableStateOf(false) }
+    val dockApps = AppCatalog.favoriteApps(apps, favoritePackageNames)
     val dateLabel = LocalDate.now().format(
         DateTimeFormatter.ofPattern("EEEE, d MMMM", Locale.getDefault()),
     )
 
+    if (isLibraryVisible) {
+        AppLibrary(
+            apps = apps,
+            query = query,
+            onQueryChange = { query = it },
+            favoritePackageNames = favoritePackageNames,
+            onFavoriteToggle = onFavoriteToggle,
+            onLaunch = onLaunch,
+            onBack = { isLibraryVisible = false },
+        )
+    } else {
+        DesktopHome(
+            dateLabel = dateLabel,
+            dockApps = dockApps,
+            onLaunch = onLaunch,
+            onOpenLibrary = { isLibraryVisible = true },
+        )
+    }
+}
+
+@Composable
+private fun DesktopHome(
+    dateLabel: String,
+    dockApps: List<LauncherApp<Drawable>>,
+    onLaunch: (LauncherApp<Drawable>) -> Unit,
+    onOpenLibrary: () -> Unit,
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -67,7 +97,7 @@ fun LauncherHome(
             .safeDrawingPadding()
             .padding(horizontal = 24.dp),
     ) {
-        Column(modifier = Modifier.padding(top = 32.dp, bottom = 24.dp)) {
+        Column(modifier = Modifier.padding(top = 32.dp)) {
             Text(
                 text = dateLabel.uppercase(Locale.getDefault()),
                 style = MaterialTheme.typography.labelMedium,
@@ -88,9 +118,81 @@ fun LauncherHome(
             )
         }
 
+        Box(
+            modifier = Modifier.weight(1f),
+            contentAlignment = Alignment.Center,
+        ) {
+            if (dockApps.isEmpty()) {
+                Text(
+                    text = stringResource(R.string.empty_favorites),
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.secondary,
+                )
+            } else {
+                LazyRow(
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(24.dp))
+                        .background(MaterialTheme.colorScheme.surface),
+                ) {
+                    items(dockApps.size, key = { dockApps[it].packageName }) { index ->
+                        AppShortcut(app = dockApps[index], onClick = { onLaunch(dockApps[index]) })
+                    }
+                }
+            }
+        }
+
+        Button(
+            onClick = onOpenLibrary,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 20.dp),
+        ) {
+            Text(stringResource(R.string.open_app_library))
+        }
+    }
+}
+
+@Composable
+private fun AppLibrary(
+    apps: List<LauncherApp<Drawable>>,
+    query: String,
+    onQueryChange: (String) -> Unit,
+    favoritePackageNames: Set<String>,
+    onFavoriteToggle: (String, Boolean) -> Unit,
+    onLaunch: (LauncherApp<Drawable>) -> Unit,
+    onBack: () -> Unit,
+) {
+    val filteredApps = AppCatalog.filterApps(apps, query)
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .safeDrawingPadding()
+            .padding(horizontal = 24.dp),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 24.dp, bottom = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = stringResource(R.string.app_library),
+                style = MaterialTheme.typography.headlineSmall,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.weight(1f),
+            )
+            TextButton(onClick = onBack) {
+                Text(stringResource(R.string.return_to_desktop))
+            }
+        }
+
         SearchBox(
             query = query,
-            onQueryChange = { query = it },
+            onQueryChange = onQueryChange,
             modifier = Modifier.fillMaxWidth(),
         )
         Row(
@@ -129,31 +231,20 @@ fun LauncherHome(
             }
         } else {
             LazyVerticalGrid(
-                columns = GridCells.Adaptive(minSize = 88.dp),
+                columns = GridCells.Adaptive(minSize = 112.dp),
                 modifier = Modifier.weight(1f),
-                contentPadding = PaddingValues(bottom = 32.dp),
+                contentPadding = PaddingValues(bottom = 24.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 items(filteredApps, key = { it.packageName }) { app ->
-                    AppGridItem(app = app, onClick = { onLaunch(app) })
+                    AppGridItem(
+                        app = app,
+                        isFavorite = app.packageName in favoritePackageNames,
+                        onFavoriteToggle = { onFavoriteToggle(app.packageName, it) },
+                        onClick = { onLaunch(app) },
+                    )
                 }
-            }
-        }
-
-        Spacer(Modifier.height(14.dp))
-        Text(
-            text = stringResource(R.string.frequent_apps),
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.secondary,
-            modifier = Modifier.padding(bottom = 8.dp),
-        )
-        LazyRow(
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            contentPadding = PaddingValues(bottom = 8.dp),
-        ) {
-            items(dockApps.size) { index ->
-                AppShortcut(app = dockApps[index], onClick = { onLaunch(dockApps[index]) })
             }
         }
     }
@@ -222,24 +313,43 @@ private fun AppShortcut(app: LauncherApp<Drawable>, onClick: () -> Unit) {
 }
 
 @Composable
-private fun AppGridItem(app: LauncherApp<Drawable>, onClick: () -> Unit) {
+private fun AppGridItem(
+    app: LauncherApp<Drawable>,
+    isFavorite: Boolean,
+    onFavoriteToggle: (Boolean) -> Unit,
+    onClick: () -> Unit,
+) {
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(18.dp))
-            .clickable(onClick = onClick)
-            .padding(vertical = 10.dp, horizontal = 4.dp),
+        modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        AppIcon(app = app, size = 48.dp)
-        Spacer(Modifier.height(8.dp))
-        Text(
-            text = app.label,
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurface,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(18.dp))
+                .clickable(onClick = onClick)
+                .padding(vertical = 10.dp, horizontal = 4.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            AppIcon(app = app, size = 48.dp)
+            Spacer(Modifier.height(8.dp))
+            Text(
+                text = app.label,
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+        TextButton(onClick = { onFavoriteToggle(!isFavorite) }) {
+            Text(
+                stringResource(
+                    if (isFavorite) R.string.unpin_app else R.string.pin_app,
+                    app.label,
+                ),
+                maxLines = 1,
+            )
+        }
     }
 }
 

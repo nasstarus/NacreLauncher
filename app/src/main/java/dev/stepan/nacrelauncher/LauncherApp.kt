@@ -24,13 +24,18 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
     private val _apps = MutableStateFlow<List<LauncherApp<Drawable>>>(emptyList())
     val apps: StateFlow<List<LauncherApp<Drawable>>> = _apps.asStateFlow()
 
-    private val _usageCounts = MutableStateFlow(readUsageCounts())
-    val usageCounts: StateFlow<Map<String, Int>> = _usageCounts.asStateFlow()
-
     private val _favoritePackageNames = MutableStateFlow(
         preferences.getStringSet(FAVORITES_KEY, emptySet()).orEmpty().toSet(),
     )
     val favoritePackageNames: StateFlow<Set<String>> = _favoritePackageNames.asStateFlow()
+
+    init {
+        val preferencesEditor = preferences.edit()
+        preferences.all.keys
+            .filter { it.startsWith(USAGE_PREFIX) }
+            .forEach(preferencesEditor::remove)
+        preferencesEditor.apply()
+    }
 
     fun refreshApps() {
         viewModelScope.launch {
@@ -55,9 +60,6 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
             ?: return false
         return try {
             context.startActivity(intent)
-            val updatedCount = (_usageCounts.value[packageName] ?: 0) + 1
-            preferences.edit().putInt(usageKey(packageName), updatedCount).apply()
-            _usageCounts.value = _usageCounts.value + (packageName to updatedCount)
             true
         } catch (_: android.content.ActivityNotFoundException) {
             false
@@ -98,17 +100,6 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
             )
             .toList()
     }
-
-    private fun readUsageCounts(): Map<String, Int> =
-        preferences.all.mapNotNull { (key, value) ->
-            if (key.startsWith(USAGE_PREFIX) && value is Int) {
-                key.removePrefix(USAGE_PREFIX) to value
-            } else {
-                null
-            }
-        }.toMap()
-
-    private fun usageKey(packageName: String) = "$USAGE_PREFIX$packageName"
 
     private companion object {
         const val PREFERENCES_NAME = "launcher_usage"

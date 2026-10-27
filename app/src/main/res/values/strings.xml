@@ -2,7 +2,12 @@
     <string name="app_name">Nacre Launcher</string>
     <string name="home_title">Make room for what matters.</string>
     <string name="home_subtitle">Your apps, close at hand.</string>
-    <string name="frequent_apps">FREQUENT</string>
+    <string name="app_library">App library</string>
+    <string name="open_app_library">Browse all apps</string>
+    <string name="return_to_desktop">Back to desktop</string>
+    <string name="empty_favorites">Your dock is empty. Browse all apps to pin favorites.</string>
+    <string name="pin_app">Pin %1$s</string>
+    <string name="unpin_app">Unpin %1$s</string>
     <string name="search_label">SEARCH</string>
     <string name="search_apps">Search apps</string>
     <string name="all_apps">All apps</string>
